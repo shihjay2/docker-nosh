@@ -12,7 +12,18 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 read -e -p "What is your domain name where NOSH will be served? (example.com); leave blank if none" -i "" domain
 echo "Docker installed, generating keys..."
-docker run -it -v /$(pwd):/data alpine /bin/sh -c "apk update && apk add --no-cache openssl shadow bash && rm -rf /var/cache/apk/* && cd /data && /bin/bash chmod +x ./keygen.sh ./keygen.sh"
+winpty docker run -it -v /$(pwd):/data alpine //bin/sh -c "apk update \
+&& apk add --no-cache openssl shadow \
+&& rm -rf /var/cache/apk/* \
+&& cd /data \
+&& openssl rand -hex 32 > key \
+&& sed -i '1s/^/1;/' key \
+&& openssl rand -hex 16 > .key \
+&& openssl enc -aes-256-cbc -md sha1 -kfile .key -in key -out key.enc \
+&& openssl rand -hex 16 > .db_password \
+&& openssl rand -hex 16 > .db_root_password \
+&& echo -n 'base64:' > .nosh_app_key \
+** cat /dev/urandom | head -c 32 | base64 >> .nosh_app_key"
 if [[ ! -z $domain ]]; then
     read -e -p "What is your email address?  This is to register your SSL certificate." -i "" email
     cp /$(pwd)/nginx_ssl.conf /$(pwd)/nginx.conf
@@ -38,17 +49,17 @@ if [[ ! -z $domain ]]; then
     echo "Creating dummy certificate for $domains ..."
     path="/etc/letsencrypt/live/$domains"
     mkdir -p "$data_path/conf/live/$domains"
-    docker-compose run --rm --entrypoint "\
+    winpty docker-compose run --rm --entrypoint "\
         openssl req -x509 -nodes -newkey rsa:1024 -days 1\
             -keyout '$path/privkey.pem' \
             -out '$path/fullchain.pem' \
             -subj '/CN=localhost'" certbot
     echo
     echo "Starting nginx ..."
-    docker-compose up --force-recreate -d nginx
+    winpty docker-compose up --force-recreate -d nginx
     echo
     echo "Deleting dummy certificate for $domains ..."
-    docker-compose run --rm --entrypoint "\
+    winpty docker-compose run --rm --entrypoint "\
         rm -Rf /etc/letsencrypt/live/$domains && \
         rm -Rf /etc/letsencrypt/archive/$domains && \
         rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
@@ -66,7 +77,7 @@ if [[ ! -z $domain ]]; then
     esac
     # Enable staging mode if needed
     if [ $staging != "0" ]; then staging_arg="--staging"; fi
-    docker-compose run --rm --entrypoint "\
+    winpty docker-compose run --rm --entrypoint "\
         certbot certonly --webroot -w /var/www/certbot \
             $staging_arg \
             $email_arg \
@@ -76,10 +87,10 @@ if [[ ! -z $domain ]]; then
             --force-renewal" certbot
     echo
     echo "Reloading nginx ..."
-    docker-compose exec nginx nginx -s reload
+    winpty docker-compose exec nginx nginx -s reload
 else
     cp /$(pwd)/nginx_old.conf /$(pwd)/nginx.conf
 fi
 echo "Running NOSH..."
-docker-compose up -d
+winpty docker-compose up -d
 exit 0
