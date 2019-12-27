@@ -1,0 +1,126 @@
+version: "3.1"
+services:
+
+    mariadb-nosh:
+      image: mariadb
+      restart: unless-stopped
+      working_dir: /application
+      volumes:
+        - nosh_dbdata:/var/lib/mysql
+        - ./nosh/encrypt.cnf:/etc/mysql/conf.d/encrypt.cnf
+        - ./key.enc:/application/key.enc
+        - ./.key:/application/.key
+      environment:
+        MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+        MYSQL_DATABASE: nosh
+        MYSQL_USER: asuser
+        MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      secrets:
+        - db_root_password
+        - db_password
+
+    syncthing:
+      image: syncthing/syncthing
+      restart: unless-stopped
+      volumes:
+        - syncthing_data:/var/syncthing
+
+    webserver:
+      image: nginx:alpine
+      restart: always
+      working_dir: /var/www
+      volumes:
+        - nosh_public:/var/www/nosh/public
+        - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./certbot/conf:/etc/letsencrypt
+        - ./certbot/www:/var/www/certbot
+      links:
+        - app-nosh
+      ports:
+        - 80:80
+        - 443:443
+      command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+    certbot:
+      image: certbot/certbot
+      volumes:
+        - ./certbot/conf:/etc/letsencrypt
+        - ./certbot/www:/var/www/certbot
+      entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+    app-nosh:
+      image: shihjay2/nosh2:latest
+      working_dir: /var/www/nosh
+      restart: unless-stopped
+      volumes:
+        - ./php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+        - nosh_data:/var/www/nosh/storage
+        - nosh_public:/var/www/nosh/public
+        - nosh_documents:/noshdocuments
+        - ./nosh/env:/var/www/nosh/.env
+      env_file: ./nosh/env
+      secrets:
+        - db_password
+        - mailgun_domain
+        - mailgun_secret
+        - nosh_uri
+        - nosh_app_key
+
+    backup:
+      image: blacklabelops/volumerize
+      restart: unless-stopped
+      environment:
+        - TZ=Europe/Berlin
+        - VOLUMERIZE_SOURCE=/source
+        - VOLUMERIZE_TARGET=file:///backup
+        - VOLUMERIZE_JOBBER_TIME=0 20 */12 * * *
+        - VOLUMERIZE_FULL_IF_OLDER_THAN=7D
+        - JOB_NAME2=RemoveOldBackups
+        - JOB_COMMAND2=/etc/volumerize/remove-older-than 7D --force
+        - JOB_TIME2=0 0 * * * *
+      networks:
+        - default
+      volumes:
+        - nosh_data:/source/nosh_data:ro
+        - nosh_dbdata:/source/nosh_dbdata:ro
+        - nosh_documents:/source/noshdocuments:ro
+        - ./.db_password:/source/docker/.db_password:ro
+        - ./.db_root_password:/source/docker/.db_root_password:ro
+        - ./mailgun_domain.txt:/source/docker/mailgun_domain.txt:ro
+        - ./mailgun_secret.txt:/source/docker/mailgun_secret.txt:ro
+        - ./nosh_uri:/source/docker/nosh_uri:ro
+        - ./.nosh_app_key:/source/docker/.nosh_app_key:ro
+        - ./.pubkey,pem:/source/docker/.pubkey.pem:ro
+        - ./.privkey.pem:/source/docker/.privkey.pem:ro
+        - ./key.enc:/source/docker/key.enc:ro
+        - ./.key:/source/docker/.key:ro
+        - ./key:/source/docker/key:ro
+        - ./nosh/env:/source/docker/nosh/env:ro
+        - ./nginx.conf:/source/docker/nginx.conf:ro
+        - ./docker-compose.yml:/source/docker/docker-compose.yml:ro
+        - backup-cache:/volumerize-cache
+        - syncthing_data:/backup
+      labels:
+        - "traefik.enable=false"
+
+secrets:
+    db_password:
+      file: ./.db_password
+    db_root_password:
+      file: ./.db_root_password
+    mailgun_domain:
+      file: mailgun_domain.txt
+    mailgun_secret:
+      file: mailgun_secret.txt
+    nosh_uri:
+      file: nosh_uri.txt
+    nosh_app_key:
+      file: ./.nosh_app_key
+
+volumes:
+    nosh_data:
+    nosh_dbdata:
+    nosh_public:
+    nosh_documents:
+    syncthing_data:
+    backup-cache:
