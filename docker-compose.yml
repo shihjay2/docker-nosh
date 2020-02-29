@@ -23,7 +23,8 @@ services:
       image: syncthing/syncthing
       restart: unless-stopped
       volumes:
-        - syncthing_data:/var/syncthing
+        - syncthing_config:/var/syncthing
+        - syncthing_data:/Sync
 
     webserver:
       image: nginx:alpine
@@ -53,12 +54,14 @@ services:
       working_dir: /var/www/nosh
       restart: unless-stopped
       volumes:
-        - ./php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+        - ./php-ini-overrides.ini:/usr/local/etc/php/conf.d/99-overrides.ini
         - nosh_data:/var/www/nosh/storage
         - nosh_public:/var/www/nosh/public
         - nosh_documents:/noshdocuments
         - ./nosh/env:/var/www/nosh/.env
       env_file: ./nosh/env
+      links:
+        - mariadb-nosh
       secrets:
         - db_password
         - mailgun_domain
@@ -100,6 +103,7 @@ services:
         - ./docker-compose.yml:/source/docker/docker-compose.yml:ro
         - backup-cache:/volumerize-cache
         - syncthing_data:/backup
+        - syncthing_config:/source/docker/syncthing:ro
       labels:
         - "traefik.enable=false"
 
@@ -123,4 +127,5 @@ volumes:
     nosh_public:
     nosh_documents:
     syncthing_data:
+    syncthing_config:
     backup-cache:

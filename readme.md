@@ -20,16 +20,20 @@
 
 ### Step 4: Install Docker-NOSH
 #### Windows:
-1. Click the Windows or Start icon.  In the Programs list, open the Git folder.  Click the option for Git Bash.
-2. <code>git clone https://github.com/shihjay2/docker-nosh.git</code>
-3. <code>cd docker-nosh</code>
-4. <code>./init_win.sh</code>
+1. If using [Docker Toolbox for Windows](https://docs.docker.com/toolbox/toolbox_install_windows/), make sure Docker is active.
+2. Win + R to open the Run window; type in <code>powershell</code> and press Enter.
+3. In Powershell: <code>$Env:COMPOSE_CONVERT_WINDOWS_PATHS=1</code>
+4. Click the Windows or Start icon.  In the Programs list, open the Git folder.  Click the option for Git Bash.
+5. <code>git clone https://github.com/shihjay2/docker-nosh.git</code>
+6. <code>cd docker-nosh</code>
+7. <code>./init_win.sh</code>
 
 #### Mac:
-1. Open the Applications folder. Open Utilities and double-click on Terminal.
-2. <code>git clone https://github.com/shihjay2/docker-nosh.git</code>
-3. <code>cd docker-nosh</code>
-4. <code>./init.sh</code>
+1. If using [Docker Toolbox for Mac](https://docs.docker.com/toolbox/toolbox_install_mac/), make sure Docker is active.
+2. Open the Applications folder. Open Utilities and double-click on Terminal.
+3. <code>git clone https://github.com/shihjay2/docker-nosh.git</code>
+4. <code>cd docker-nosh</code>
+5. <code>./init.sh</code>
 
 #### Linux:
 1. Open a command-line terminal.
