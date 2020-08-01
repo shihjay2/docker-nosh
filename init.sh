@@ -10,7 +10,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
     echo 'Error: docker-compose is not installed.' >&2
     exit 1
 fi
-read -e -r -p "What is your domain name where NOSH will be served? (example.com); leave blank if none" -i "" domain
+read -e -r -p "What is your domain name where NOSH will be served? (example.com); leave blank if none" domain
+[ -z "${domain}" ] && domain=''
 echo "Docker installed, generating keys..."
 docker run -it -v "$(pwd)":/data alpine /bin/sh -c "apk update \
 && apk add --no-cache openssl shadow \
@@ -90,6 +91,7 @@ if [[ -n $domain ]]; then
     docker-compose exec nginx nginx -s reload
 else
     cp ./nginx_old.conf ./nginx.conf
+    echo "" > ./nosh_uri.txt
 fi
 echo "Running NOSH..."
 docker-compose up -d
