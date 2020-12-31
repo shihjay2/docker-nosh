@@ -3,8 +3,8 @@
 
 ## Installation
 ### Step 1: Preparation
-1. It is recommended to use an email service to take advantage of all the features of NOSH such as message and schedule notifications.  Compatible mail serivices include [Mailgun](https://mailgun.com).
-2. Make sure you have a domain name registered and linked to the WAN IP (Wide Area Network Internet Protocol) address where Docker-NOSH is connected to.  You can get a crazy cheap one ($0.88/year) at [Namecheap](https://www.namecheap.com).  They have great instructions for how to do this.
+1. It is recommended to use an email service to take advantage of all the features of NOSH such as message and schedule notifications.  [Mailgun](https://mailgun.com) is a compatible mail service.
+2. Make sure you have a domain name registered and linked to the WAN IP (Wide Area Network Internet Protocol) address where Docker-NOSH is connected to.  You can get  one at [Namecheap](https://www.namecheap.com).  They have great instructions for how to do this.
 3. If your Docker-NOSH is installed physically and is behind a network router, make sure port forwarding is set on your router for ports 22 (for SSH), 80 (for HTTP), and 443 (for HTTPS) routed to the LAN IP (Local Area Network Internet Protocol) address for Docker-NOSH.
 
 ### Step 2: Download and install [Docker](https://www.docker.com/products/docker-desktop)
@@ -40,6 +40,16 @@
 2. <code>git clone https://github.com/shihjay2/docker-nosh.git</code>
 3. <code>cd docker-nosh</code>
 4. <code>./init.sh</code>
+
+### Stopping NOSH
+1. Go to the docker-nosh directory.
+2. <code>docker-compose down<code>
+3. This will shut down the Docker container without removing the volumes (data) that has been saved from your NOSH instance.
+
+### Removing NOSH
+1. Go to the docker-nosh directory.
+2. <code>docker-compose down -v<code>
+3. This will shut down the Docker container in addition to removing the volumes (data).  Please ensure you have a backup or that there is no valuable data to save before doing this; once it's done you can't retrieve your data!
 
 ## Security Vulnerabilities
 
