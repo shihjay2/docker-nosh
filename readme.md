@@ -43,12 +43,12 @@
 
 ### Stopping NOSH
 1. Go to the docker-nosh directory.
-2. <code>docker-compose down<code>
+2. <code>docker-compose down</code>
 3. This will shut down the Docker container without removing the volumes (data) that has been saved from your NOSH instance.
 
 ### Removing NOSH
 1. Go to the docker-nosh directory.
-2. <code>docker-compose down -v<code>
+2. <code>docker-compose down -v</code>
 3. This will shut down the Docker container in addition to removing the volumes (data).  Please ensure you have a backup or that there is no valuable data to save before doing this; once it's done you can't retrieve your data!
 
 ## Security Vulnerabilities
