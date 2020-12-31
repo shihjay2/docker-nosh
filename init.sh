@@ -24,7 +24,7 @@ docker run -it -v "$(pwd)":/data alpine /bin/sh -c "apk update \
 && openssl rand -hex 16 > .db_password \
 && openssl rand -hex 16 > .db_root_password \
 && echo -n 'base64:' > .nosh_app_key \
-** cat /dev/urandom | head -c 32 | base64 >> .nosh_app_key"
+&& cat /dev/urandom | head -c 32 | base64 >> .nosh_app_key"
 if [[ -n $domain ]]; then
     read -e -r -p "What is your email address?  This is to register your SSL certificate." -i "" email
     cp ./nginx_ssl.conf ./nginx.conf

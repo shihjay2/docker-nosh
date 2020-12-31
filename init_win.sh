@@ -23,7 +23,7 @@ winpty docker run -it -v /"$(pwd)":/data alpine //bin/sh -c "apk update \
 && openssl rand -hex 16 > .db_password \
 && openssl rand -hex 16 > .db_root_password \
 && echo -n 'base64:' > .nosh_app_key \
-** cat /dev/urandom | head -c 32 | base64 >> .nosh_app_key"
+&& cat /dev/urandom | head -c 32 | base64 >> .nosh_app_key"
 sed -i "s=\./=/$(pwd)/=" docker-compose.yml
 if [[ -n $domain ]]; then
     read -e -r -p "What is your email address?  This is to register your SSL certificate." -i "" email
