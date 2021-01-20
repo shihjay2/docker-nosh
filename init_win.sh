@@ -57,7 +57,7 @@ if [[ -n $domain ]]; then
             -subj '/CN=localhost'" certbot
     echo
     echo "Starting nginx ..."
-    winpty docker-compose up --force-recreate -d nginx
+    winpty docker-compose up --force-recreate -d webserver
     echo
     echo "Deleting dummy certificate for $domain ..."
     winpty docker-compose run --rm --entrypoint "\
@@ -88,7 +88,7 @@ if [[ -n $domain ]]; then
             --force-renewal" certbot
     echo
     echo "Reloading nginx ..."
-    winpty docker-compose exec nginx nginx -s reload
+    winpty docker-compose exec webserver webserver -s reload
 else
     cp nginx_old.conf nginx.conf
 fi
