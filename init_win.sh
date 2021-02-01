@@ -35,7 +35,7 @@ if [[ -n $domain ]]; then
     data_path="$(pwd)/certbot"
     staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
     if [ -d "$data_path" ]; then
-        read -p -r "Existing data found for $domain. Continue and replace existing certificate? (y/N) " decision
+        read -r -p "Existing data found for $domain. Continue and replace existing certificate? (y/N) " decision
         if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
             exit
         fi
